@@ -7,12 +7,22 @@ import { unfold } from 'ramda'
 
 // state management with redux
 const initialState = {
-  symbols: [],
+  symbolStreams: [],
 },
       reducer = (state = initialState, action) => {
         switch(action.type) {
         case 'ADD_SYMBOL_STREAM':
-          return {...state, symbols: [action.symbolStream, ...state.symbols] };
+          return {...state, symbolStreams: [action.symbolStream, ...state.symbolStreams] };
+        case 'SCROLL_SYMBOL_STREAMS':
+          const updatedSymbolStreams = state.symbolStreams.map( symbolStream => {
+            const updatedSymbols = symbolStream.symbols.map(symbol => {
+              return {...symbol, y: symbol.y + symbolStream.scrollSpeed}
+            });
+
+            return {...symbolStream, symbols: updatedSymbols};
+          });
+
+          return {...state, symbolStreams: updatedSymbolStreams };
         default:
           return state;
         }
@@ -41,6 +51,8 @@ class SymbolStream {
   static colorFadeInterval = 8;
 
   constructor(xStart) {
+    this.scrollSpeed = Math.floor(5 + Math.random() * 5);
+
     const yStart = Math.floor(Math.random() * 130),
           streamLength = Math.floor(5 + Math.random() * 100);
 
@@ -55,7 +67,7 @@ class SymbolStream {
     const first = new Symbol(xStart, yStart, 255, 255, 255), //1st symbol in each stream is white
           rest = unfold(step, [200 /* green */, 60 /* blue */, yStart - Symbol.symbolSize, 0]);
 
-    return [first, ...rest];
+    this.symbols = [first, ...rest];
   }
 }
 
@@ -76,13 +88,21 @@ const sketch = p => {
   };
 
   p.draw = () => {
-    store.getState().symbols.forEach( stream => {
-      stream.forEach( symbol => {
+    p.background(0);
+
+    const symbolStreams = store.getState().symbolStreams;
+
+    for (const symbolStream of symbolStreams) {
+      for (const symbol of symbolStream.symbols) {
         p.fill(symbol.r, symbol.g, symbol.b);
         p.textFont("Consolas");
         p.textSize(Symbol.symbolSize);
         p.text(symbol.character, symbol.x, symbol.y);
-      });
+      };
+    };
+
+    store.dispatch({
+      type: 'SCROLL_SYMBOL_STREAMS'
     });
   };
 }

@@ -2,21 +2,8 @@
 
 import p5 from 'p5'
 import { createStore } from 'redux'
+import { unfold } from 'ramda'
 
-
-// functional programming helper
-const unfold = (step, seed) => {
-  var output  = [],
-      element = seed,
-      result;
-
-  while ((result = step(element)) !== null) {
-    output.unshift(result[0]);
-    element = result[1];
-  }
-
-  return output;
-}
 
 // state management with redux
 const initialState = {
@@ -63,7 +50,7 @@ class SymbolStream {
             [g - SymbolStream.colorFadeInterval, b - SymbolStream.colorFadeInterval,
              yStart - Symbol.symbolSize, totalSymbols + 1]
           ]
-          : null;
+          : false;
 
     const first = new Symbol(xStart, yStart, 255, 255, 255), //1st symbol in each stream is white
           rest = unfold(step, [200 /* green */, 60 /* blue */, yStart - Symbol.symbolSize, 0]);

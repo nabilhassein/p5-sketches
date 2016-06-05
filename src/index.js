@@ -1,46 +1,15 @@
 'use strict';
 
 import p5 from 'p5'
-import { createStore } from 'redux'
 import { unfold } from 'ramda'
-import { List, Map } from 'immutable'
 
-// state management
-const initialState = Map({
-  symbolStreams: List([]),
-  height: 0,
-}),
-      reducer = (state = initialState, action) => {
-        switch(action.type) {
-        case 'SET_GLOBAL_HEIGHT':
-          return state.set('height', action.height);
 
-        case 'ADD_SYMBOL_STREAM':
-          return state.update('symbolStreams', streams => streams.push(action.symbolStream));
-
-        case 'SCROLL_SYMBOL_STREAMS':
-          // setAll/updateAll functions would be nice for nested Map/List combinations...
-          const updatedSymbolStreams = state.get('symbolStreams').map(symbolStream => {
-            return symbolStream.set('symbols', symbolStream.get('symbols').map(symbol => {
-              return symbol.update('y', y => y > state.get('height') ? symbolStream.get('yStart') : y + symbolStream.get('scrollSpeed')
-              )
-            }));
-          });
-
-          return state.set('symbolStreams', updatedSymbolStreams);
-
-        default:
-          return state;
-        }
-      },
-      store = createStore(reducer);
-
-// custom classes, actually implemented as Immutable.js Maps
+// custom classes actually implement as plain old JS objects
 class Symbol {
   static symbolSize = 24;
 
   constructor(x, y, r, g, b) {
-    return Map({
+    return {
       character: String.fromCharCode(
         0x30A0 + Math.random() * (0x30FF-0x30A0+1) // katakana
       ),
@@ -49,7 +18,7 @@ class Symbol {
       r,
       b,
       g,
-    });
+    };
   }
 }
 
@@ -70,53 +39,49 @@ class SymbolStream {
     const first = new Symbol(xStart, yStart, 255, 255, 255), //1st symbol in each stream is white
           rest = unfold(step, [200 /* green */, 60 /* blue */, yStart - Symbol.symbolSize, 0]);
 
-    return Map({
-      symbols: List([first, ...rest]),
+    return {
+      symbols: [first, ...rest],
       scrollSpeed: Math.floor(5 + 5*Math.random()),
       yStart,
-    });
+    };
   }
 }
+
+// GLOBAL STATE
+let symbolStreams = [],
+    height;
 
 // main p5 logic
 const sketch = p => {
   p.setup = () => {
-    const height = screen.availHeight,
-          width = screen.availWidth;
+    height = screen.availHeight; // GLOBAL STATE UPDATE
+    const width = screen.availWidth;
 
     p.createCanvas(width, height);
     p.background(0);
 
     const columns = new Array(Math.floor(width / Symbol.symbolSize)).fill(0).map((x, i) => i * Symbol.symbolSize);
 
-    store.dispatch({
-      type: 'SET_GLOBAL_HEIGHT',
-      height
-    });
-
     for (const xStart of columns) {
-      store.dispatch({
-        type: 'ADD_SYMBOL_STREAM',
-        symbolStream: new SymbolStream(xStart),
-      });
+      symbolStreams.push(new SymbolStream(xStart)); // GLOBAL STATE UPDATE
     }
   };
 
   p.draw = () => {
     p.background(0);
 
-    store.getState().get('symbolStreams').forEach(symbolStream => {
-      symbolStream.get('symbols').forEach( symbol => {
-        p.fill(symbol.get('r'), symbol.get('g'), symbol.get('b'));
+    for (const symbolStream of symbolStreams) {
+      for (const symbol of symbolStream.symbols) {
+        // draw the symbol
+        p.fill(symbol.r, symbol.g, symbol.b);
         p.textFont("Consolas");
         p.textSize(Symbol.symbolSize);
-        p.text(symbol.get('character'), symbol.get('x'), symbol.get('y'));
-      });
-    });
+        p.text(symbol.character, symbol.x, symbol.y);
 
-    store.dispatch({
-      type: 'SCROLL_SYMBOL_STREAMS',
-    });
+        // GLOBAL STATE UPDATE: change the symbol's position
+        symbol.y = symbol.y > height ? symbolStream.yStart : symbol.y + symbolStream.scrollSpeed;
+      }
+    }
   };
 }
 

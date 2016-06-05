@@ -8,17 +8,22 @@ import { List, Map } from 'immutable'
 // state management
 const initialState = Map({
   symbolStreams: List([]),
+  height: 0,
 }),
       reducer = (state = initialState, action) => {
         switch(action.type) {
+        case 'SET_GLOBAL_HEIGHT':
+          return state.set('height', action.height);
+
         case 'ADD_SYMBOL_STREAM':
           return state.update('symbolStreams', streams => streams.push(action.symbolStream));
 
         case 'SCROLL_SYMBOL_STREAMS':
-          // an updateAll function would be nice for nested Map/List combinations...
+          // setAll/updateAll functions would be nice for nested Map/List combinations...
           const updatedSymbolStreams = state.get('symbolStreams').map(symbolStream => {
             return symbolStream.set('symbols', symbolStream.get('symbols').map(symbol => {
-              return symbol.update('y', y => y + symbolStream.get('scrollSpeed'));
+              return symbol.update('y', y => y > state.get('height') ? symbolStream.get('yStart') : y + symbolStream.get('scrollSpeed')
+              )
             }));
           });
 
@@ -68,6 +73,7 @@ class SymbolStream {
     return Map({
       symbols: List([first, ...rest]),
       scrollSpeed: Math.floor(5 + 5*Math.random()),
+      yStart,
     });
   }
 }
@@ -75,10 +81,18 @@ class SymbolStream {
 // main p5 logic
 const sketch = p => {
   p.setup = () => {
-    p.createCanvas(screen.availWidth, screen.availHeight);
+    const height = screen.availHeight,
+          width = screen.availWidth;
+
+    p.createCanvas(width, height);
     p.background(0);
 
-    const columns = new Array(Math.floor(p.width / Symbol.symbolSize)).fill(0).map((x, i) => i * Symbol.symbolSize);
+    const columns = new Array(Math.floor(width / Symbol.symbolSize)).fill(0).map((x, i) => i * Symbol.symbolSize);
+
+    store.dispatch({
+      type: 'SET_GLOBAL_HEIGHT',
+      height
+    });
 
     for (const xStart of columns) {
       store.dispatch({
@@ -101,7 +115,7 @@ const sketch = p => {
     });
 
     store.dispatch({
-      type: 'SCROLL_SYMBOL_STREAMS'
+      type: 'SCROLL_SYMBOL_STREAMS',
     });
   };
 }

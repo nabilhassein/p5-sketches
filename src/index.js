@@ -47,39 +47,36 @@ class SymbolStream {
   }
 }
 
-// GLOBAL STATE
-let symbolStreams = [],
-    height;
-
-// main p5 logic
+// stateful p5 logic
 const sketch = p => {
   p.setup = () => {
-    height = screen.availHeight; // GLOBAL STATE UPDATE
+    // state variables
+    p.height = screen.availHeight;
+    p.symbolStreams = [];
+
     const width = screen.availWidth;
 
-    p.createCanvas(width, height);
+    p.createCanvas(width, p.height);
     p.background(0);
 
     const columns = new Array(Math.floor(width / Symbol.symbolSize)).fill(0).map((x, i) => i * Symbol.symbolSize);
 
     for (const xStart of columns) {
-      symbolStreams.push(new SymbolStream(xStart)); // GLOBAL STATE UPDATE
+      p.symbolStreams.push(new SymbolStream(xStart));
     }
   };
 
   p.draw = () => {
     p.background(0);
 
-    for (const symbolStream of symbolStreams) {
+    for (const symbolStream of p.symbolStreams) {
       for (const symbol of symbolStream.symbols) {
-        // draw the symbol
         p.fill(symbol.r, symbol.g, symbol.b);
         p.textFont("Consolas");
         p.textSize(Symbol.symbolSize);
         p.text(symbol.character, symbol.x, symbol.y);
 
-        // GLOBAL STATE UPDATE: change the symbol's position
-        symbol.y = symbol.y > height ? symbolStream.yStart : symbol.y + symbolStream.scrollSpeed;
+        symbol.y = symbol.y > p.height ? symbolStream.yStart : symbol.y + symbolStream.scrollSpeed;
       }
     }
   };

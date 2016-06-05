@@ -1,8 +1,9 @@
 # p5 sketches
-Trying to learn some basic p5 to create algorithmic art.
+Trying to learn some basic p5 to create algorithmic art.  
+First sketch is live -- [Matrix-style green rain](https://nabilhassein.github.io/p5-sketches)
 
 # To try it locally
-```
+``` 
 npm install
 npm run build
 npm run start

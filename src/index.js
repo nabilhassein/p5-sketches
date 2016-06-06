@@ -50,9 +50,7 @@ class SymbolStream {
 // stateful p5 logic
 const sketch = p => {
   p.setup = () => {
-    // state variables
     p.height = screen.availHeight;
-    p.symbolStreams = [];
 
     const width = screen.availWidth;
 
@@ -61,9 +59,7 @@ const sketch = p => {
 
     const columns = new Array(Math.floor(width / Symbol.symbolSize)).fill(0).map((x, i) => i * Symbol.symbolSize);
 
-    for (const xStart of columns) {
-      p.symbolStreams.push(new SymbolStream(xStart));
-    }
+    p.symbolStreams = columns.map(xStart => new SymbolStream(xStart));
   };
 
   p.draw = () => {

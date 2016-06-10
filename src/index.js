@@ -1,81 +1,96 @@
-'use strict';
-
 import p5 from 'p5'
-import { unfold } from 'ramda'
+import { range, unfold } from 'ramda'
 
 
-// custom classes actually implement as plain old JS objects
-class Symbol {
-  static symbolSize = 24;
+const MAX_ITERATION = 16;
 
-  constructor(x, y, r, g, b) {
-    return {
-      character: String.fromCharCode(
-        0x30A0 + Math.random() * (0x30FF-0x30A0+1) // katakana
-      ),
-      x,
-      y,
-      r,
-      b,
-      g,
-    };
-  }
+// set colors in this function
+const generatePalette = () => {
+  const palette1 = range(0, 16).map(i => "rgb(" + (i*8) + "," + (i*8) + "," + (128+i*4) + ")");
+
+  // const palette2 = range(16, 64).map(i => "rgb(" + (128+i-16) + "," + (128+i-16) + "," + (192+i-16) + ")");
+
+  
+  // // 319 is TOTALLY a magic number in this context
+  // const palette3 = range(64, MAX_ITERATIONS).map(i => "rgb(" + ((319-i)%256) + "," + ((128+(319-i)/2)%256) + "," + ((319-i)%256) + ")");
+
+  const palette2 = [],
+        palette3 = [];
+
+  return [...palette1, ...palette2, ...palette3, "rgb(0,0,0)"];
 }
 
-class SymbolStream {
-  static colorFadeInterval = 8;
+const palette = generatePalette();
 
-  constructor(xStart) {
-    const yStart = Math.floor(Math.random() * 130),
-          streamLength = Math.floor(5 + Math.random() * 100);
+// (x1, y1) and (x2, y2) define that part of the complex plane that is visible
+var x1 = -2.5;
+var x2 = 1;
+var y1 = -1;
+var y2 = 1;
 
-    const step = ([g, b, yStart, totalSymbols]) => totalSymbols >= streamLength ? false :
-          [
-            new Symbol(xStart, yStart, 0, g, b),
-            [g - SymbolStream.colorFadeInterval, b - SymbolStream.colorFadeInterval,
-             yStart - Symbol.symbolSize, totalSymbols + 1]
-          ];
+// width and height of visible complex plane
+var cwidth = x2-x1;
+var cheight = y2-y1;
 
-    const first = new Symbol(xStart, yStart, 255, 255, 255), //1st symbol in each stream is white
-          rest = unfold(step, [200 /* green */, 60 /* blue */, yStart - Symbol.symbolSize, 0]);
-
-    return {
-      symbols: [first, ...rest],
-      scrollSpeed: Math.floor(5 + 5*Math.random()),
-      yStart,
-    };
-  }
-}
-
-// stateful p5 logic
 const sketch = p => {
   p.setup = () => {
-    p.height = screen.availHeight;
+    p.createCanvas(500, 300);
+    renderFractal();
+  }
 
-    const width = screen.availWidth;
+  p.mousePressed = () => {
+    const mouseXCoord = (p.mouseX * 1.0 / p.width) * cwidth + x1;
+    const mouseYCoord = (p.mouseY * 1.0 / p.height) * cheight + y1;
 
-    p.createCanvas(width, p.height);
-    p.background(0);
+    x1 = mouseXCoord - cwidth / 8.0;
+    x2 = mouseXCoord + cwidth / 8.0;
+    y1 = mouseYCoord - cheight / 8.0;
+    y2 = mouseYCoord + cheight / 8.0;
 
-    const columns = new Array(Math.floor(width / Symbol.symbolSize)).fill(0).map((x, i) => i * Symbol.symbolSize);
+    cwidth /= 4.0;
+    cheight /= 4.0;
 
-    p.symbolStreams = columns.map(xStart => new SymbolStream(xStart));
-  };
+    renderFractal();
+  }
 
-  p.draw = () => {
-    p.background(0);
+  const renderFractal = () => {
+    for (const x of range(0, p.width) {
+      for (const y of range(0, p.height) {
+        const escapeTime = calculateEscapeTime(x, y);
 
-    for (const symbolStream of p.symbolStreams) {
-      for (const symbol of symbolStream.symbols) {
-        p.fill(symbol.r, symbol.g, symbol.b);
-        p.textFont("Consolas");
-        p.textSize(Symbol.symbolSize);
-        p.text(symbol.character, symbol.x, symbol.y);
+        p.stroke(palette[escapeTime]);
 
-        symbol.y = symbol.y > p.height ? symbolStream.yStart : symbol.y + symbolStream.scrollSpeed;
+        p.point(x,y);
       }
     }
-  };
+  }
+
+  const calculateEscapeTime = (x, y) => {
+    const cReal = mapXToReal(x),
+          cImg = mapYToComplex(y);
+
+    const step = ([zReal, zImg, iteration]) => {
+      if (iteration >= MAX_ITERATION || zReal * zReal + zImg*zImg >= 4) {
+        return false;
+      } else {
+        const nextZReal = zReal*zReal - zImg*zImg + cReal,
+              nextZImg  =  2*zReal*zImg + cImg;
+
+        return (Math.abs(zReal - nextZReal) < Number.EPSILON) && (Math.abs(zImg - nextZImg) < Number.EPSILON) ?
+          [MAX_ITERATIONS, [nextZReal, nextZImg, MAX_ITERATIONS]] :
+          [iteration + 1, [nextZReal, nextZImg, iteration + 1]]
+      }
+    }
+
+    return last(unfold(step, [0.0, 0.0, 0]));
+  }
+
+  // map our bitmap x coordinate to a real axis coordinate
+  const mapXToReal = xcoord => cwidth * xcoord / p.width + x1;
+
+  // map our bitmap y coordinate to an imaginary axis coordinate
+  const mapYToComplex = ycoord => y1 + cheight * ycoord / p.height;
 }
+
 
 new p5(sketch)

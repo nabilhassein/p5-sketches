@@ -1,8 +1,8 @@
 import p5 from 'p5'
-import { range, unfold } from 'ramda'
+import { last, range, unfold } from 'ramda'
 
 
-const MAX_ITERATION = 16;
+const MAX_ITERATIONS = 16;
 
 // set colors in this function
 const generatePalette = () => {
@@ -54,8 +54,8 @@ const sketch = p => {
   }
 
   const renderFractal = () => {
-    for (const x of range(0, p.width) {
-      for (const y of range(0, p.height) {
+    for (const x of range(0, p.width)) {
+      for (const y of range(0, p.height)) {
         const escapeTime = calculateEscapeTime(x, y);
 
         p.stroke(palette[escapeTime]);
@@ -70,7 +70,7 @@ const sketch = p => {
           cImg = mapYToComplex(y);
 
     const step = ([zReal, zImg, iteration]) => {
-      if (iteration >= MAX_ITERATION || zReal * zReal + zImg*zImg >= 4) {
+      if (iteration >= MAX_ITERATIONS || zReal * zReal + zImg*zImg >= 4) {
         return false;
       } else {
         const nextZReal = zReal*zReal - zImg*zImg + cReal,

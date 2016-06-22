@@ -2,7 +2,7 @@
 
 import p5 from 'p5'
 import { unfold } from 'ramda'
-
+import React from 'react'
 
 // custom classes actually implement as plain old JS objects
 class Symbol {
@@ -78,4 +78,17 @@ const sketch = p => {
   };
 }
 
-new p5(sketch)
+export default class MatrixGreenRain extends React.Component {
+  constructor() {
+    super();
+    this.id = "matrix-green-rain";
+  }
+
+  render() {
+    return <div id={this.id} />;
+  }
+
+  componentDidMount() {
+    new p5(sketch)    
+  }
+}

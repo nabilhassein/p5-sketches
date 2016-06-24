@@ -89,6 +89,10 @@ export default class MatrixGreenRain extends React.Component {
   }
 
   componentDidMount() {
-    new p5(sketch)    
+    this.sketch = new p5(sketch);
+  }
+
+  componentWillUnmount() {
+    this.sketch.remove();
   }
 }

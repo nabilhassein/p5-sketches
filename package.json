@@ -8,7 +8,8 @@
     "build": "webpack --optimize-minimize --optimize-dedupe --devtool source-map",
     "postbuild": "",
     "start": "webpack-dev-server --content-base dist --host 0.0.0.0",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "gh-pages -d dist"
   },
   "author": "",
   "license": "ISC",
@@ -32,6 +33,7 @@
   },
   "devDependencies": {
     "babel-preset-react": "^6.5.0",
+    "gh-pages": "^0.11.0",
     "webpack-dev-server": "^1.14.1"
   }
 }

@@ -4,6 +4,7 @@
 // https://gist.github.com/jimfb/4faa6cbfb1ef476bd105
 
 import React from 'react'
+import moment from 'moment'
 
 export default class CountdownClock extends React.Component {
   constructor() {
@@ -101,7 +102,7 @@ export default class CountdownClock extends React.Component {
       }
 
       this.tick();
-    }), this.tickPeriod)
+    }, this.tickPeriod))
   }
 
   handleComplete() {
@@ -125,10 +126,12 @@ export default class CountdownClock extends React.Component {
 
   drawTimer() {
     const percent = this.fraction * this.seconds + 1.5;
-    const decimals = (this.seconds <= 9.9) ? 1 : 0;
+
+    const displayTime = moment(this.seconds * 1000).format("m:ss");
+
     this.context.globalAlpha = this.props.alpha;
     this.context.fillStyle = this.props.color;
-    this.context.fillText(this.seconds.toFixed(decimals), this.radius, this.radius);
+    this.context.fillText(displayTime, this.radius, this.radius);
     this.context.beginPath();
     this.context.arc(this.radius, this.radius, this.radius,     Math.PI * 1.5,     Math.PI * percent, false);
     this.context.arc(this.radius, this.radius, this.radius/1.8, Math.PI * percent, Math.PI * 1.5,     true);

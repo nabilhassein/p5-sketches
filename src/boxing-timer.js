@@ -5,9 +5,9 @@ import CountdownClock from './countdown-clock'
 let active = 0;
 
 const states = [
-  { color: "green" , seconds: 150 },
-  { color: "yellow", seconds: 30 },
-  { color: "red"   , seconds: 60 },
+  { color: "green" , seconds: 150, offset: 30 },
+  { color: "yellow", seconds: 30, offset: 0 },
+  { color: "red"   , seconds: 60, offset: 0 },
 ];
 
 
@@ -26,7 +26,7 @@ export default class BoxingTimer extends React.Component {
   render() {
     const size = 0.8 * Math.min(screen.availWidth, screen.availHeight);
     return (<div id={this.id}>
-            <CountdownClock size={size} seconds={this.state.seconds} color={this.state.color} onComplete={this.clockDone} />
+            <CountdownClock size={size} seconds={this.state.seconds} color={this.state.color} offset={this.state.offset} onComplete={this.clockDone} />
             </div>);
   }
 }

@@ -23,6 +23,7 @@ export default class CountdownClock extends React.Component {
   
   static propTypes = {
     seconds: React.PropTypes.number,
+    offset: React.PropTypes.number,
     size: React.PropTypes.number,
     color: React.PropTypes.string,
     alpha: React.PropTypes.number,
@@ -33,6 +34,7 @@ export default class CountdownClock extends React.Component {
     size: 300,
     color: '#000',
     alpha: 1,
+    offset: 0,
   }
 
   componentWillReceiveProps(newProps) {
@@ -127,7 +129,7 @@ export default class CountdownClock extends React.Component {
   drawTimer() {
     const percent = this.fraction * this.seconds + 1.5;
 
-    const displayTime = moment(this.seconds * 1000).format("m:ss");
+    const displayTime = moment((this.props.offset + this.seconds) * 1000).format("m:ss");
 
     this.context.globalAlpha = this.props.alpha;
     this.context.fillStyle = this.props.color;

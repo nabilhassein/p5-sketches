@@ -1,5 +1,6 @@
 import React from 'react'
 import Button from 'react-button'
+import annyang from 'annyang'
 
 export default class MuteButton extends React.Component {
   onClick = () => {
@@ -14,6 +15,14 @@ export default class MuteButton extends React.Component {
     this.id = "mute-button";
     this.state = {};
     this.state.muted = false;
+
+    const commands = {
+      'mute': () => this.onClick(),
+      'unmute': () => this.onClick(),
+    };
+
+    annyang.addCommands(commands);
+    annyang.start();
   }
 
   render() {

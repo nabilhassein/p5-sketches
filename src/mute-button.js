@@ -10,7 +10,7 @@ export default class MuteButton extends React.Component {
     });
   }
 
-  constructor() {
+  constructor(props) {
     super();
     this.id = "mute-button";
     this.state = {};
@@ -21,8 +21,7 @@ export default class MuteButton extends React.Component {
       'unmute': () => this.onClick(),
     };
 
-    annyang.addCommands(commands);
-    annyang.start();
+    props.annyang.addCommands(commands);
   }
 
   render() {

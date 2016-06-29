@@ -1,5 +1,6 @@
 import React from 'react'
 import Sound from 'react-sound'
+import annyang from 'annyang'
 import MuteButton from './mute-button'
 import CountdownClock from './countdown-clock'
 
@@ -20,6 +21,11 @@ export default class BoxingTimer extends React.Component {
     this.setState(states[active]);
   }
 
+  reset = () => {
+    active = 0;
+    this.setState(states[active]);
+  }
+
   toggleMute = () => {
     muted = !muted;
   }
@@ -28,12 +34,22 @@ export default class BoxingTimer extends React.Component {
     super();
     this.id = "boxing-timer";
     this.state = states[0];
+
+    const commands = {
+      'reset': this.reset,
+    };
+
+    annyang.addCommands(commands);
+    annyang.debug();
+    annyang.start();
+
+    this.annyang = annyang;
   }
 
   render() {
     const size = 0.8 * Math.min(screen.availWidth, screen.availHeight);
     return (<div id={this.id}>
-            <MuteButton onClick={this.toggleMute}/>
+            <MuteButton onClick={this.toggleMute} annyang={this.annyang}/>
             <CountdownClock
                size={size}
                seconds={this.state.seconds}

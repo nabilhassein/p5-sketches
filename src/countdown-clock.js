@@ -40,6 +40,8 @@ export default class CountdownClock extends React.Component {
   componentWillReceiveProps(newProps) {
     this.seconds = newProps.seconds;
     this.color = newProps.color;
+    this.clearTimer();
+    this.cancelTimer();
     this.setupTimer();
   }
 
@@ -141,6 +143,6 @@ export default class CountdownClock extends React.Component {
   }
 
   render() {
-    return (<canvas ref='canvas' className="countdown-clock" width={this.props.size} height={this.props.size}></canvas>);
+  return (<canvas ref='canvas' className="countdown-clock" width={this.props.size} height={this.props.size}></canvas>);
   }
 }

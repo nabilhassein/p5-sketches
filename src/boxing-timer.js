@@ -1,9 +1,11 @@
 import React from 'react'
 import Sound from 'react-sound'
+import MuteButton from './mute-button'
 import CountdownClock from './countdown-clock'
 
 // GLOBAL STATE
 let active = 0;
+let muted = false;
 
 const states = [
   { color: "green" , seconds: 150, offset: 30 },
@@ -13,9 +15,13 @@ const states = [
 
 
 export default class BoxingTimer extends React.Component {
-  clockDone() {
+  clockDone = () => {
     active = (active + 1) % 3;
     this.setState(states[active]);
+  }
+
+  toggleMute = () => {
+    muted = !muted;
   }
 
   constructor() {
@@ -27,10 +33,17 @@ export default class BoxingTimer extends React.Component {
   render() {
     const size = 0.8 * Math.min(screen.availWidth, screen.availHeight);
     return (<div id={this.id}>
-            <CountdownClock size={size} seconds={this.state.seconds} color={this.state.color} offset={this.state.offset} onComplete={this.clockDone} />
+            <MuteButton onClick={this.toggleMute}/>
+            <CountdownClock
+               size={size}
+               seconds={this.state.seconds}
+               color={this.state.color}
+               offset={this.state.offset}
+               onComplete={this.clockDone}
+            />
             <Sound
                url="media/boxing-bell.mp3"
-               playStatus={Sound.status.PLAYING}
+               playStatus={muted ? Sound.status.STOPPED : Sound.status.PLAYING}
             />
             </div>);
   }

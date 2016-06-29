@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "prebuild": "rm -rf dist && mkdir dist && cp static/* dist/",
+    "prebuild": "rm -rf dist && mkdir dist && cp -r static/* dist/",
     "build": "webpack --optimize-minimize --optimize-dedupe --devtool source-map",
     "postbuild": "",
     "start": "webpack-dev-server --content-base dist --host 0.0.0.0",

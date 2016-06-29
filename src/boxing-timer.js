@@ -1,4 +1,5 @@
 import React from 'react'
+import Sound from 'react-sound'
 import CountdownClock from './countdown-clock'
 
 // GLOBAL STATE
@@ -27,6 +28,10 @@ export default class BoxingTimer extends React.Component {
     const size = 0.8 * Math.min(screen.availWidth, screen.availHeight);
     return (<div id={this.id}>
             <CountdownClock size={size} seconds={this.state.seconds} color={this.state.color} offset={this.state.offset} onComplete={this.clockDone} />
+            <Sound
+               url="media/boxing-bell.mp3"
+               playStatus={Sound.status.PLAYING}
+            />
             </div>);
   }
 }

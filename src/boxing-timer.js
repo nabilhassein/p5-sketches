@@ -13,7 +13,7 @@ const states = [
 
 
 export default class BoxingTimer extends React.Component {
-  clockDone = () => {
+  clockDone() {
     active = (active + 1) % 3;
     this.setState(states[active]);
   }
